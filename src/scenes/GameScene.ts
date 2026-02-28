@@ -88,18 +88,10 @@ export default class GameScene extends Phaser.Scene {
             const dist = Phaser.Math.Distance.Between(p.x, p.y, c.x, c.y);
             if (Date.now() - this.creationTime < 1000 || dist > 40) return;
 
-            // Collision Busted!
-            this.physics.world.pause();
-            this.player.isMoving = true;
-
-            // Show the "Busted" dialogue manually since it's a collision not a bush check
-            this.events.emit('bush_searched_dialogue', 'Cop', "Police! You're under arrest!");
-
+            // Immediate Collision Bust!
             const timerEl = document.getElementById('game-timer')?.innerText || "0:00";
-            this.time.delayedCall(3000, () => {
-                this.events.emit('game_over', { time: timerEl });
-                this.scene.pause();
-            });
+            this.events.emit('game_over', { time: timerEl });
+            this.scene.pause();
         });
 
         // Setup touch gestures
@@ -211,9 +203,8 @@ export default class GameScene extends Phaser.Scene {
     }
 
     private createFogOfWar() {
-        // Fill screen with darkness
+        // Fill world with darkness
         this.fowOverlay = this.add.graphics();
-        this.fowOverlay.setScrollFactor(0); // Lock to screen
         this.fowOverlay.fillStyle(0x000000, 0.85); // Moody night darkness
         this.fowOverlay.fillRect(0, 0, 800, 600);
         this.fowOverlay.setDepth(100);
@@ -229,9 +220,9 @@ export default class GameScene extends Phaser.Scene {
     }
 
     private updateFogOfWar() {
-        // Translate world player pos to screen-space for the fixed FOV overlay
-        this.lightMask.x = this.player.x - this.cameras.main.worldView.x;
-        this.lightMask.y = this.player.y - this.cameras.main.worldView.y;
+        // Use world coordinates directly; camera zoom handles the rest
+        this.lightMask.x = this.player.x;
+        this.lightMask.y = this.player.y;
     }
 
     private checkBushInteraction() {

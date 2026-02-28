@@ -6,16 +6,16 @@ export default class BootScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('player', '/src/assets/player.png');
-        this.load.image('bush', '/src/assets/bush.png');
-        this.load.image('cop', '/src/assets/cop.png');
-        this.load.image('stranger', '/src/assets/stranger.png');
-        this.load.image('raccoon', '/src/assets/raccoon.png');
-        this.load.image('couple1', '/src/assets/couple1.png');
-        this.load.image('couple2', '/src/assets/couple2.png');
-        this.load.image('couple3', '/src/assets/couple3.png');
-        this.load.image('background', '/src/assets/background.png');
-        this.load.json('encounters', '/src/assets/encounters.json');
+        this.load.image('player', '/assets/player.png');
+        this.load.image('bush', '/assets/bush.png');
+        this.load.image('cop', '/assets/cop.png');
+        this.load.image('stranger', '/assets/stranger.png');
+        this.load.image('raccoon', '/assets/raccoon.png');
+        this.load.image('couple1', '/assets/couple1.png');
+        this.load.image('couple2', '/assets/couple2.png');
+        this.load.image('couple3', '/assets/couple3.png');
+        this.load.image('background', '/assets/background.png');
+        this.load.json('encounters', '/assets/encounters.json');
     }
 
     create() {
