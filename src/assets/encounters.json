@@ -1,0 +1,34 @@
+{
+    "encounters": {
+        "Couple": [
+            "Pardon us, darling! We are just... bird watching.",
+            "Oh! Is it that time already?",
+            "Simply enjoying the midnight air, Officer.",
+            "Do you mind? We were in the middle of a very private conversation."
+        ],
+        "Raccoon": [
+            "A raccoon screeched! The noise is deafening!",
+            "Scrounging for scraps, but found only trouble.",
+            "Those glowing eyes... they've seen too much!",
+            "CHITTER! The local wildlife is not pleased."
+        ],
+        "Stranger": [
+            "My, my! You've found someone truly handsome.",
+            "A mysterious wink in the moonlight.",
+            "Is that a carnation in your lapel, or are you just glad to see me?",
+            "The night is young, and so are we."
+        ],
+        "Empty": [
+            "Just some rustling leaves...",
+            "A crisp 1960s breeze blows through the brambles.",
+            "Nothing here but the distant sound of a taxi horn.",
+            "Quiet... too quiet."
+        ],
+        "Cop": [
+            "Police! Put your hands where I can see them!",
+            "You're coming with us, 'midnight wanderer'.",
+            "Vagrancy is a serious offense in this park.",
+            "Caught red-handed in the Rambles!"
+        ]
+    }
+}
