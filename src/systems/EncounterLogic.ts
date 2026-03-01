@@ -21,6 +21,8 @@ export default class EncounterLogic {
     static triggerRaccoonAlert(cops: Phaser.GameObjects.Group, playerPos: { x: number, y: number }) {
         cops.children.each((child: any) => {
             child.setAIState(CopState.INVESTIGATE, playerPos);
+            // Allow cops to run through bushes for 10 seconds when a raccoon is heard
+            child.triggerBypass(10000);
             return true;
         });
     }
