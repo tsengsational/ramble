@@ -12,6 +12,8 @@ export default class Cop extends Phaser.GameObjects.Sprite {
     private currentDirection: { x: number, y: number } = { x: 32, y: 0 };
     private lastKnownPlayerPos: { x: number, y: number } | null = null;
     private investigationStepsRemaining: number = 0;
+    private bypassBushes: boolean = false;
+    private bypassTimer: Phaser.Time.TimerEvent | null = null;
 
     constructor(scene: Phaser.Scene, x: number, y: number) {
         super(scene, x, y, 'cop');
@@ -59,6 +61,35 @@ export default class Cop extends Phaser.GameObjects.Sprite {
 
     getAIState() { return this.aiState; }
 
+    triggerBypass(duration: number) {
+        this.bypassBushes = true;
+        if (this.bypassTimer) this.bypassTimer.remove();
+
+        this.bypassTimer = this.scene.time.delayedCall(duration, () => {
+            this.bypassBushes = false;
+            this.bypassTimer = null;
+        });
+    }
+
+    private isTileBlocked(tx: number, ty: number): boolean {
+        // Boundary check
+        if (tx < 32 || tx > 768 || ty < 32 || ty > 568) return true;
+
+        // Bush check (if not in bypass mode)
+        if (!this.bypassBushes) {
+            const bushes = (this.scene as any).bushes as Phaser.GameObjects.Group;
+            if (bushes) {
+                // Check if any bush exists at this exact grid coordinate
+                const blocked = bushes.children.entries.some((bush: any) => {
+                    return Math.abs(bush.x - tx) < 5 && Math.abs(bush.y - ty) < 5;
+                });
+                if (blocked) return true;
+            }
+        }
+
+        return false;
+    }
+
     update() {
         if (this.isMoving) return;
 
@@ -93,11 +124,9 @@ export default class Cop extends Phaser.GameObjects.Sprite {
                 { x: 0, y: 32 }, { x: 0, y: -32 }
             ];
 
-            // Filter directions that keep us inside the park
+            // Filter directions that keep us inside the park AND avoid bushes
             const validDirs = dirs.filter(d => {
-                const tx = this.x + d.x;
-                const ty = this.y + d.y;
-                return tx >= 32 && tx <= 768 && ty >= 32 && ty <= 568;
+                return !this.isTileBlocked(this.x + d.x, this.y + d.y);
             });
 
             if (validDirs.length > 0) {
@@ -108,18 +137,28 @@ export default class Cop extends Phaser.GameObjects.Sprite {
         // Final sanity check before moving
         const finalX = this.x + this.currentDirection.x;
         const finalY = this.y + this.currentDirection.y;
-        if (finalX >= 32 && finalX <= 768 && finalY >= 32 && finalY <= 568) {
+        if (!this.isTileBlocked(finalX, finalY)) {
             this.moveTo(finalX, finalY);
+        } else {
+            // If currently blocked but didn't turn (due to 10% chance), force a turn next update
+            this.currentDirection = { x: 0, y: 0 };
         }
     }
 
     private doInvestigate() {
         if (!this.lastKnownPlayerPos) return;
 
-        // Simplistic grid move toward last seen
-        if (this.x < this.lastKnownPlayerPos.x) this.moveTo(this.x + 32, this.y);
-        else if (this.x > this.lastKnownPlayerPos.x) this.moveTo(this.x - 32, this.y);
-        else if (this.y < this.lastKnownPlayerPos.y) this.moveTo(this.x, this.y + 32);
-        else if (this.y > this.lastKnownPlayerPos.y) this.moveTo(this.x, this.y - 32);
+        // Move toward last seen if path is clear or in bypass mode
+        let targetX = this.x;
+        let targetY = this.y;
+
+        if (this.x < this.lastKnownPlayerPos.x) targetX += 32;
+        else if (this.x > this.lastKnownPlayerPos.x) targetX -= 32;
+        else if (this.y < this.lastKnownPlayerPos.y) targetY += 32;
+        else if (this.y > this.lastKnownPlayerPos.y) targetY -= 32;
+
+        if (!this.isTileBlocked(targetX, targetY)) {
+            this.moveTo(targetX, targetY);
+        }
     }
 }
