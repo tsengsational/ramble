@@ -16,6 +16,11 @@ export default class GameScene extends Phaser.Scene {
     private uiManager!: UIManager;
     private level: number = 1;
     private creationTime: number = 0;
+    private currentBGMusic?: Phaser.Sound.BaseSound;
+    private dangerMusic?: Phaser.Sound.BaseSound;
+    private bgMusicTracks: string[] = ['bg_music_1', 'bg_music_2'];
+    private isDangerState: boolean = false;
+    private dangerTimer?: Phaser.Time.TimerEvent;
 
     constructor() {
         super('GameScene');
@@ -28,6 +33,7 @@ export default class GameScene extends Phaser.Scene {
     create() {
         this.creationTime = Date.now();
         this.createBackground();
+        this.initAudio();
 
         if (this.input.keyboard) {
             this.cursors = this.input.keyboard.createCursorKeys();
@@ -81,6 +87,14 @@ export default class GameScene extends Phaser.Scene {
 
         this.events.on('raccoon_alert', (playerPos: any) => {
             EncounterLogic.triggerRaccoonAlert(this.cops, playerPos);
+            this.triggerDangerMusic();
+        });
+
+        // Add couple reveal sound
+        this.events.on('bush_searched_dialogue', (outcome: BushOutcome) => {
+            if (outcome === 'Couple') {
+                this.sound.play('couple_1_sfx');
+            }
         });
 
         // Setup individual overlap handler
@@ -115,6 +129,13 @@ export default class GameScene extends Phaser.Scene {
                     else this.player.handleMovement({ up: { isDown: true }, left: { isDown: false }, right: { isDown: false }, down: { isDown: false } });
                 }
             }
+        });
+
+        // Cleanup audio on scene shutdown/restart
+        this.events.on('shutdown', () => {
+            if (this.currentBGMusic) this.currentBGMusic.stop();
+            if (this.dangerMusic) this.dangerMusic.stop();
+            if (this.dangerTimer) this.dangerTimer.remove();
         });
 
         console.log('Game Started - Explore the Rambles!');
@@ -235,6 +256,49 @@ export default class GameScene extends Phaser.Scene {
             }
             return true;
         });
+    }
+
+    private initAudio() {
+        // Randomly pick one of the background tracks to start
+        const trackKey = Phaser.Utils.Array.GetRandom(this.bgMusicTracks);
+        this.currentBGMusic = this.sound.add(trackKey, { loop: true, volume: 0.5 });
+        this.currentBGMusic.play();
+
+        this.dangerMusic = this.sound.add('danger_music_1', { loop: true, volume: 0.6 });
+    }
+
+    private triggerDangerMusic() {
+        this.sound.play('raccoon_sfx');
+
+        // Always refresh the alert timer
+        if (this.dangerTimer) this.dangerTimer.remove();
+        this.dangerTimer = this.time.delayedCall(10000, () => {
+            this.stopDangerMusic();
+        });
+
+        if (this.isDangerState) return;
+
+        console.log("SWITCHING TO DANGER MUSIC");
+        this.isDangerState = true;
+
+        if (this.currentBGMusic) {
+            this.currentBGMusic.pause();
+        }
+
+        if (this.dangerMusic) {
+            // Ensure any stale danger music is stopped before starting
+            this.dangerMusic.stop();
+            this.dangerMusic.play();
+        }
+    }
+
+    private stopDangerMusic() {
+        if (!this.isDangerState) return;
+
+        console.log("RETURNING TO NORMAL MUSIC");
+        this.isDangerState = false;
+        if (this.dangerMusic) this.dangerMusic.stop();
+        if (this.currentBGMusic) this.currentBGMusic.resume();
     }
 }
 

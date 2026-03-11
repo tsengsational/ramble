@@ -16,6 +16,13 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('couple3', '/assets/couple3.png');
         this.load.image('background', '/assets/background.png');
         this.load.json('encounters', '/assets/encounters.json');
+
+        // Audio Assets
+        this.load.audio('bg_music_1', '/assets/sounds/bg_music_1.mp3');
+        this.load.audio('bg_music_2', '/assets/sounds/bg_music_2.mp3');
+        this.load.audio('danger_music_1', '/assets/sounds/danger_music_1.mp3');
+        this.load.audio('raccoon_sfx', '/assets/sounds/raccoon.mp3');
+        this.load.audio('couple_1_sfx', '/assets/sounds/couple_1.mp3');
     }
 
     create() {

@@ -31,12 +31,18 @@ export default class MenuScene extends Phaser.Scene {
         });
 
         this.input.keyboard?.on('keydown-SPACE', () => {
+            if ((this.sound as any).context && (this.sound as any).context.state === 'suspended') {
+                (this.sound as any).context.resume();
+            }
             this.scene.start('GameScene');
         });
 
         this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
             // Only start game if NOT clicking the help button
             if (pointer.y < 460) {
+                if ((this.sound as any).context && (this.sound as any).context.state === 'suspended') {
+                    (this.sound as any).context.resume();
+                }
                 this.scene.start('GameScene');
             }
         });
